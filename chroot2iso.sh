@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# chroot2iso.sh (Custom Debian live environment scripts) 0.0.1
+# chroot2iso.sh (Custom Debian live environment scripts) 0.1.0
 #
 # Copyright (C) 2018 masakoodaa
 # License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
@@ -43,7 +43,7 @@ More information availabe at https://github.com/masakoodaa/custom-debian-live-en
 }
 
 show_version() {
-	echo "chroot2iso.sh (Custom Debian live environment scripts) 0.0.1
+	echo "chroot2iso.sh (Custom Debian live environment scripts) 0.1.0
 Copyright (C) 2018 masakoodaa
 License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>.
 This is free software: you are free to change and redistribute it.
@@ -97,7 +97,7 @@ while :; do
 		--install-dependencies)
 			installdeps=true
 			;;
-		-m|--outputfile)
+		-o|--outputfile)
 			if [ "$2" ]
 		       	then
 				outputfile="$2"
@@ -135,7 +135,7 @@ while :; do
 			break
 			;;
 		-?*)
-			abort 'Unknown option. See \"--help\" for help or \"--usage\" for usage.'
+			abort 'Unknown option. See "--help" for help or "--usage" for usage.'
 			;;
 		*)
 			break
@@ -147,8 +147,7 @@ done
 # make sure we are root & good to go
 if [ "$EUID" -ne 0 ]
 then
-	echo "Missing root privileges. Aborting."
-	exit 1
+	abort 'Missing root privileges. Aborting.'
 fi
 
 dependencies="chroot debootstrap syslinux isolinux squashfs-tools genisoimage memtest86+ rsync"
@@ -208,7 +207,7 @@ set -e
 set -u
 
 echo "Compressing the chroot environment into a Squash filesystem..."
-#mksquashfs "$workdir"/chroot "$workdir"/image/live/filesystem.squashfs -e boot
+mksquashfs "$workdir"/chroot "$workdir"/image/live/filesystem.squashfs -e boot
 
 echo "Preparing the bootloader..." #TODO: check that there's only one of each
 cp "$workdir"/chroot/boot/vmlinuz-* "$workdir"/image/live/vmlinuz1
@@ -239,16 +238,8 @@ label memtest86+
 menu label ^Memory Failure Detection (memtest86+)
 kernel /live/memtest" > "$workdir"/image/isolinux/isolinux.cfg
 
-echo "Copying files..." #TODO: refactor into loop?
-cp /usr/lib/ISOLINUX/isolinux.bin "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/menu.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/hdt.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/ldlinux.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libutil.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libmenu.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libcom32.c32 "$workdir"/image/isolinux/
-cp /usr/lib/syslinux/modules/bios/libgpl.c32 "$workdir"/image/isolinux/
-cp /usr/share/misc/pci.ids "$workdir"/image/isolinux/
+echo "Copying files..."
+cp /usr/lib/ISOLINUX/isolinux.bin /usr/lib/syslinux/modules/bios/{menu,hdt,ldlinux,lib{util,menu,com32,gpl}}.c32 /usr/share/misc/pci.ids -t "$workdir"/image/isolinux/
 cp /boot/memtest86+.bin "$workdir"/image/live/memtest
 
 echo "Generating USI image..."
