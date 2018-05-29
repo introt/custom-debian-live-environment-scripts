@@ -3,6 +3,8 @@ Scripts for easy custom Debian live environment creation (WIP)
 
 Based on Will Haley's article [Create a Custom Debian Live Environment (CD or USB)](https://willhaley.com/blog/custom-debian-live-environment/)
 
+You might want to use this instead: [Xixer -  Docker based tool for Debian Live install to USB](https://github.com/jnalley/xixer)
+
 ## How to use
 
 All scripts have "--help" option describing usage and available options.
